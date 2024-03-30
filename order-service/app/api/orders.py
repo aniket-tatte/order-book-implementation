@@ -14,7 +14,7 @@ async def createOrder(payload: CreateOrderRequest):
         'order_status': OrderStatus.PENDING,
         **payload.dict(),
     }
-    service.addOrderToOrderBook(order)
+    await service.addOrderToOrderBook(order)
     return order
 
 @orders.get('/', response_model=List[OrderResponse])
@@ -24,8 +24,6 @@ async def getAllOrders():
 @orders.get('/{order_id}/', response_model=OrderResponse)
 async def getOrder(order_id: str):
     order = await db_manager.getOrder(order_id)
-    print(dict(order))
-    return order
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     order = dict(order)

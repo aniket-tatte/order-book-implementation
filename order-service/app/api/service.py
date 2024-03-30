@@ -1,18 +1,20 @@
 import os
 import requests
+import httpx
 from app.api.models import OrderResponse as Order
 
 ORDER_BOOK_SERVICE_BASE_URL = os.getenv('ORDER_BOOK_SERVICE_BASE_URL')
 
-def addOrderToOrderBook(order: Order):
-    url = f'''{ORDER_BOOK_SERVICE_BASE_URL}/api/v1/order_book/addOrderToOrderBook'''
+async def addOrderToOrderBook(order: Order):
+    url = f"{ORDER_BOOK_SERVICE_BASE_URL}/api/v1/order_book/addOrderToOrderBook"
     try:
-        response = requests.post(url, json=order)
-        if response.status_code == 200:
-            print(f"Order with order_id {order['order_id']} added successfully")
-        else:
-            print(f"Failed to add order. Status code: {response.status_code}")
-    except requests.exceptions.RequestException as e:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=order)
+            if response.status_code == 200:
+                print(f"Order with order_id {order['order_id']} added successfully")
+            else:
+                print(f"Failed to add order. Status code: {response.status_code}")
+    except httpx.RequestError as e:
         print(f"order_id - {order['order_id']} An error occurred: {e}")
 
 def getTradeDataByOrder(order: Order):

@@ -69,14 +69,20 @@ class OrderBook():
                 # ''')
                 if matchingOrder['quantity']==0:
                     self.removeOrderFromOrderBook(matchingOrder, tradeQuantity)
-                    await service.markOrderAsComplete(matchingOrder['order_id'])
+                    service.markOrderAsComplete(matchingOrder['order_id'])
+                    print(f'mark order {matchingOrder["order_id"]} complete')
                 else:
+                    service.markOrderAsProcessing(matchingOrder['order_id'])
                     self.volumeMap[(matchingOrder['price'], matchingOrder['order_side'])] = max(0, self.volumeMap[(matchingOrder['price'], matchingOrder['order_side'])] - tradeQuantity)
             else:
                 break
 
         if order['quantity'] > 0:
+            service.markOrderAsProcessing(order['order_id'])
             self.addOrderToOrderBook(order)
+        else:
+            print(f'mark order {order["order_id"]} complete')
+            service.markOrderAsComplete(order['order_id'])
     
     def addOrderToOrderBook(self, order: Order):
         if (order['price'], order['order_side']) not in self.queueMap:

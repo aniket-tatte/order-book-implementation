@@ -10,6 +10,7 @@ class OrderStatus(str, enum.Enum):
     PENDING = 'Pending'
     COMPLETED = 'Completed'
     CANCELLED = 'Cancelled'
+    PROCESSING = 'Processing'
 
 class CreateOrderRequest(BaseModel):
     quantity: int = Field(..., gt=0)

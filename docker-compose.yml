@@ -31,7 +31,7 @@ services:
     environment:
       - DATABASE_URI=postgresql://username:password@trade_db/trade_db_dev
       - WEB_SOCKET_SERVICE_BASE_URL=http://web_socket_service:8000
-      - ORDER_SERIVCE_BASE_URL=http://order_service:8000
+      - ORDER_SERVICE_BASE_URL=http://order_service:8000
   
   trade_db:
     image: postgres:12.1-alpine
