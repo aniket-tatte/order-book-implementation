@@ -1,0 +1,57 @@
+version: "3.7"
+
+services:
+  order_service:
+    build: ./order-service
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./order-service/:/app/
+    ports:
+      - 8001:8000
+    environment:
+      - DATABASE_URI=postgresql://username:password@order_db/order_db_dev
+      - ORDER_BOOK_SERVICE_BASE_URL=http://order_book_service:8000
+
+  order_db:
+    image: postgres:12.1-alpine
+    volumes:
+      - postgres_data_order:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=order_db_dev
+
+  order_book_service:
+    build: ./order-book-service
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./order-book-service/:/app/
+    ports:
+      - 8002:8000
+    environment:
+      - DATABASE_URI=postgresql://username:password@trade_db/trade_db_dev
+      - WEB_SOCKET_SERVICE_BASE_URL=http://web_socket_service:8000
+      - ORDER_SERIVCE_BASE_URL=http://order_service:8000
+  
+  trade_db:
+    image: postgres:12.1-alpine
+    volumes:
+      - postgres_data_trade:/var/lib/postgresql/data/
+    environment:
+      - POSTGRES_USER=username
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=trade_db_dev
+  
+  web_socket_service:
+    build: ./web-socket-service
+    command: uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+    volumes:
+      - ./web-socket-service/:/app/
+    ports:
+      - 8003:8000
+    environment:
+      - ORDER_BOOK_SERVICE_BASE_URL=http://order_book_service:8000
+
+volumes:
+  postgres_data_order:
+  postgres_data_trade:
