@@ -64,6 +64,6 @@ async def updateOrderStatus(payload: UpdateOrderStatusRequest):
     order = await db_manager.getOrder(payload['order_id'])
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    if order.order_status != OrderStatus.PENDING:
-        raise HTTPException(status_code=404, detail=f"Order Status can not be updated order_status {order.order_status}")
+    if order.order_status not in [OrderStatus.PENDING, OrderStatus.PROCESSING]:
+        raise HTTPException(status_code=400, detail=f"Order Status can not be updated order_status {order.order_status}")
     return await db_manager.updateOrderStatus(payload)

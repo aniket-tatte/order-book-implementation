@@ -49,6 +49,7 @@ class OrderBook():
 
     async def executeOrder(self, order:Order):
         # Run the matching algorithm for incoming order and add the order to order book if not traded completely
+        originalOrderQuantity = order['quantity']
         oppositeOrderSide = self.__getOppositeSideOfOrder(order)
         oppositeOrderSideHeap = self.lowestSellingPriceHeap if oppositeOrderSide == OrderSide.SELL else self.highestBuyingPriceHeap
         while (order["quantity"] > 0) and (len(oppositeOrderSideHeap) > 0):
@@ -72,13 +73,15 @@ class OrderBook():
                     service.markOrderAsComplete(matchingOrder['order_id'])
                     print(f'mark order {matchingOrder["order_id"]} complete')
                 else:
-                    service.markOrderAsProcessing(matchingOrder['order_id'])
+                    if tradeQuantity>0:
+                        service.markOrderAsProcessing(matchingOrder['order_id'])  
                     self.volumeMap[(matchingOrder['price'], matchingOrder['order_side'])] = max(0, self.volumeMap[(matchingOrder['price'], matchingOrder['order_side'])] - tradeQuantity)
             else:
                 break
 
         if order['quantity'] > 0:
-            service.markOrderAsProcessing(order['order_id'])
+            if order['quantity'] < originalOrderQuantity:
+                service.markOrderAsProcessing(order['order_id'])
             self.addOrderToOrderBook(order)
         else:
             print(f'mark order {order["order_id"]} complete')
