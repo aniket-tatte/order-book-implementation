@@ -56,7 +56,10 @@ async def deleteOrder(order_id: str):
         'order_id': order_id,
         'order_status': OrderStatus.CANCELLED
     }
-    return await db_manager.updateOrderStatus(payload)
+    await db_manager.updateOrderStatus(payload)
+    return {
+        'cancelOrderSuccess': True
+    }
 
 @orders.post('/updateOrderStatus')
 async def updateOrderStatus(payload: UpdateOrderStatusRequest):
@@ -66,4 +69,7 @@ async def updateOrderStatus(payload: UpdateOrderStatusRequest):
         raise HTTPException(status_code=404, detail="Order not found")
     if order.order_status not in [OrderStatus.PENDING, OrderStatus.PROCESSING]:
         raise HTTPException(status_code=400, detail=f"Order Status can not be updated order_status {order.order_status}")
-    return await db_manager.updateOrderStatus(payload)
+    await db_manager.updateOrderStatus(payload)
+    return {
+        'updateOrderStatusSuccess': True
+    }

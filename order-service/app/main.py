@@ -19,7 +19,7 @@ async def startup():
 
 @app.on_event("shutdown")
 async def shutdown():
-    print('Shutting Down')
+    print('Cleaning database before Shutting Down')
     await cleanDatabase()
     await database.disconnect()
 

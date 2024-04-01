@@ -31,7 +31,7 @@ async def sendOrderBookData(websocket):
         try:
             data = getOrderBookData()
             await websocket.send_json(data)
-            await asyncio.sleep(10)
+            await asyncio.sleep(1)
         except starlette.websockets.WebSocketDisconnect:
             break
 

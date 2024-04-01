@@ -62,12 +62,7 @@ class OrderBook():
                 trade = self.__createTradeObject(order, matchingOrder, tradePrice, tradeQuantity)
                 trade_id = await db_manager.createTrade(trade)
                 trade['trade_id'] = trade_id
-                print(trade_id)
                 await service.sendTradeUpdate(trade)
-                # print(f'''
-                # \nTrade Executed\order_id {order['order_id']}\order_id {matchingOrder['order_id']}
-                # \nTrade Price {tradePrice}\nTrade Quantity {tradeQuantity}
-                # ''')
                 if matchingOrder['quantity']==0:
                     self.removeOrderFromOrderBook(matchingOrder, tradeQuantity)
                     service.markOrderAsComplete(matchingOrder['order_id'])
@@ -84,7 +79,6 @@ class OrderBook():
                 service.markOrderAsProcessing(order['order_id'])
             self.addOrderToOrderBook(order)
         else:
-            print(f'mark order {order["order_id"]} complete')
             service.markOrderAsComplete(order['order_id'])
     
     def addOrderToOrderBook(self, order: Order):
@@ -117,14 +111,22 @@ class OrderBook():
 
     def getOrderBookSnapshot(self, depth = 5):
         response = {
-            'buySide': {},
-            'sellSide': {}
+            'buySide': [],
+            'sellSide': []
         }
         for (price, order_side), quantity in self.volumeMap.items():
             if order_side == OrderSide.BUY:
-                response['buySide'][price] = quantity
+                response['buySide'].append({
+                    'price': price,
+                    'quantity': quantity
+                })
             else:
-                response['sellSide'][price] = quantity
+                response['sellSide'].append({
+                    'price': price,
+                    'quantity': quantity
+                })
+        response['buySide'] = sorted(response["buySide"], key=lambda x: x["price"])
+        response["sellSide"] = sorted(response["sellSide"], key=lambda x: x["price"])
         return response
     
     def __createTradeObject(self, order: Order, matchingOrder: Order, tradePrice: float, tradeQuantity: int):
